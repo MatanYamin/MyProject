@@ -8,10 +8,14 @@ def add_message_to_db(cursor, mydb, data):
     3) Message
     4) Subject
     5) Creation date."""
+    if check_values(data) == 0:
+        # If the return is 0, it means something is missing.
+        return 0
     sql = "INSERT INTO messages (Sender, Receiver, Message, Subject, Date, Unread) VALUES (%s, %s, %s, %s, %s, %s)"
     val = (data['Sender'], data['Receiver'], data['Message'], data['Subject'], data['Date'], "0")
     cursor.execute(sql, val)
     mydb.commit()
+    return 1
 
 
 def read_messages_for_specific_user(cursor, mydb, user):
@@ -74,3 +78,24 @@ def mark_message_as_read(cursor, messages):
         val = ("1", flag[0], )
         # "flag[0]" is the "ID" field of a message
         cursor.execute(sql, val)
+
+
+def get_messages_for_logged_user(cursor, mydb, user):
+    cursor.execute("SELECT * FROM messages WHERE Receiver = %s ", (user,))
+    messages_list = []
+    for message in cursor.fetchall():
+        # the '-1' is to avoid getting the last field (Unread). We don't need it here.
+        messages_list.append(message[:-1])
+    # Mark that message as read.
+    mark_message_as_read(cursor, messages_list)
+    mydb.commit()
+    return messages_list
+
+
+def check_values(data):
+    """This function just checking the body of the request."""
+    try:
+        if data['Sender'] and data['Receiver'] and data['Message'] and data['Subject'] and data['Date']:
+            return 1
+    except:
+        return 0

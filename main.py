@@ -97,5 +97,10 @@ def login_to_read_messages():
         return "Wrong password."
 
 
+@app.route("/check", methods=["GET"])
+def get_something():
+    return "Check works"
+
+
 if __name__ == "__main__":
     app.run(debug=True)

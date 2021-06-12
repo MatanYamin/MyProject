@@ -33,8 +33,8 @@ def write_message():
 @app.route("/messages_for_user", methods=["GET"])
 def read_messages_for_user():
     user = login()  # 'login()' will return -1 if a user is not logged, else: return the user's name.
-    data = request.get_json(force=True)  # Fetching data from the request
     if user == -1:
+        data = request.get_json(force=True)  # Fetching data from the request
         user = data['User']
     # Connection to DB
     connection = connect.connect_db()
@@ -49,8 +49,8 @@ def read_messages_for_user():
 @app.route("/unread_messages_for_user", methods=["GET"])
 def unread_messages_for_user():
     user = login()  # 'login()' will return -1 if a user is not logged, else: return the user's name.
-    data = request.get_json(force=True)  # Fetching data from the request
     if user == -1:
+        data = request.get_json(force=True)  # Fetching data from the request
         user = data['User']
     # Connection to DB
     connection = connect.connect_db()

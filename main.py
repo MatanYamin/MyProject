@@ -27,12 +27,15 @@ def write_message():
 # Here we are getting a name (User) and returning all of his messages.
 @app.route("/messages_for_user", methods=["GET"])
 def read_messages_for_user():
+    user = login()  # 'login()' will return -1 if a user is not logged, else: return the user's name.
+    data = request.get_json(force=True)  # Fetching data from the request
+    if user == -1:
+        user = data['User']
     # Connection to DB
     connection = connect.connect_db()
     cursor = connection.cursor()
-    data = request.get_json(force=True)  # Fetching data from the request
     # Sending data to the handler and receive all the messages inside a list called "messages":
-    messages = handle.read_messages_for_specific_user(cursor, connection, data['User'])
+    messages = handle.read_messages_for_specific_user(cursor, connection, user)
     connection.close()  # Close connection to avoid overload
     return flask.jsonify(messages)
 
@@ -40,12 +43,15 @@ def read_messages_for_user():
 # Here we are getting a name (User) and returning all unread messages he has.
 @app.route("/unread_messages_for_user", methods=["GET"])
 def unread_messages_for_user():
+    user = login()  # 'login()' will return -1 if a user is not logged, else: return the user's name.
+    data = request.get_json(force=True)  # Fetching data from the request
+    if user == -1:
+        user = data['User']
     # Connection to DB
     connection = connect.connect_db()
     cursor = connection.cursor()
-    data = request.get_json(force=True)  # Fetching data from the request
     # Sending data to the handler and receive all unread messages inside a list called "unread_messages":
-    unread_messages = handle.get_unread_messages_for_specific_user(cursor, connection, data['User'])
+    unread_messages = handle.get_unread_messages_for_specific_user(cursor, connection, user)
     connection.close()  # Close connection to avoid overload
     return flask.jsonify(unread_messages)
 
@@ -78,28 +84,18 @@ def delete_message():
     return "The message has been deleted successfully."
 
 
-# in "login" we receive username and password from Postman "Basic Auth", verify and then returning all his messages
-@app.route("/login", methods=["GET"])
-def login_to_read_messages():
-    user = request.authorization["username"]
-    password = request.authorization["password"]
-    if not user or not password:
-        return "Username and/or Password is missing."
-    if password == config.temp_password():
-        # connection to DB
-        connection = connect.connect_db()
-        cursor = connection.cursor()
-        # sending the username inorder to get all of his messages:
-        messages = handle.get_messages_for_logged_user(cursor, connection, user)
-        connection.close()  # close connection to avoid overload
-        return flask.jsonify(messages)
-    else:
-        return "Wrong password."
-
-
-@app.route("/check", methods=["GET"])
-def get_something():
-    return "Check works"
+def login():
+    try:
+        user = request.authorization["username"]
+        password = request.authorization["password"]
+        if not user or not password:
+            return -1
+        if password == config.temp_password():
+            return user
+        else:
+            return "Password is wrong. Please enter 12345."
+    except:
+        return -1
 
 
 if __name__ == "__main__":

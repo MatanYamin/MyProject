@@ -9,6 +9,11 @@ import config
 app = Flask(__name__)
 
 
+@app.route("/", methods=["GET"])
+def home():
+    return "Welcome to MyProject. You are at my API (nginx) over aws ec2. By Matan Yamin."
+
+
 # Here we are creating a new message as requested.
 @app.route("/write_message", methods=["POST"])
 def write_message():
